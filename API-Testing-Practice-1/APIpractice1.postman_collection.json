@@ -1,0 +1,398 @@
+{
+	"info": {
+		"_postman_id": "806f404e-98f6-4f40-87c1-cab5351c8b6d",
+		"name": "APIpractice2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30900609"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonResponse = pm.response.json()\r",
+							"\r",
+							"pm.environment.set(\"id\", jsonResponse.bookingid)\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var first_name = pm.variables.replaceIn(\"{{$randomFirstName}}\")\r",
+							"pm.environment.set(\"first_name\", first_name)\r",
+							"console.log(first_name)\r",
+							"\r",
+							"var last_name = pm.variables.replaceIn(\"{{$randomLastName}}\")\r",
+							"pm.environment.set(\"last_name\", last_name)\r",
+							"console.log(last_name)\r",
+							"\r",
+							"let min = 1\r",
+							"let max = 999\r",
+							"function randomNumber(min, max) {\r",
+							"    return Math.random() * (max - min) + min\r",
+							"}\r",
+							"var total_price = Number(Math.round(randomNumber(min, max)))\r",
+							"pm.environment.set(\"total_price\", total_price)\r",
+							"console.log(total_price)\r",
+							"\r",
+							"var deposit_paid = Boolean(Math.round(randomNumber(0, 1)))\r",
+							"pm.environment.set(\"deposit_paid\", deposit_paid)\r",
+							"console.log(deposit_paid)\r",
+							"\r",
+							"const time = require('moment')\r",
+							"const check_in = time().format(\"YYYY-MM-DD\")\r",
+							"pm.environment.set(\"check_in\", check_in)\r",
+							"console.log(check_in)\r",
+							"\r",
+							"const check_out = time().add(3, 'd').format(\"YYYY-MM-DD\")\r",
+							"pm.environment.set(\"check_out\", check_out)\r",
+							"console.log(check_out)\r",
+							"\r",
+							"var additional_needs = \"Snacks\"\r",
+							"pm.environment.set(\"additional_needs\", additional_needs)\r",
+							"console.log(additional_needs)\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\": \"{{first_name}}\",\r\n    \"lastname\": \"{{last_name}}\",\r\n    \"totalprice\": {{total_price}},\r\n    \"depositpaid\": {{deposit_paid}},\r\n    \"bookingdates\": {\r\n        \"checkin\": \"{{check_in}}\",\r\n        \"checkout\": \"{{check_out}}\"\r\n    },\r\n    \"additionalneeds\": \"{{additional_needs}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch after Create",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var status_code = pm.response.code\r",
+							"\r",
+							"switch(status_code)\r",
+							"{\r",
+							"    case 200:\r",
+							"    {\r",
+							"        var jsonResponse = pm.response.json()\r",
+							"\r",
+							"        pm.test(\"Fisrt Name validation\", function() {\r",
+							"            pm.expect(jsonResponse.firstname).to.eql(pm.iterationData.get(\"first_name\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"Last Name validation\", function() {\r",
+							"            pm.expect(jsonResponse.lastname).to.eql(pm.iterationData.get(\"last_name\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"Check In validation\", function() {\r",
+							"            pm.expect(jsonResponse.bookingdates.checkin).to.eql(pm.iterationData.get(\"check_in\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"Check Out validation\", function() {\r",
+							"            pm.expect(jsonResponse.bookingdates.checkout).to.eql(pm.iterationData.get(\"check_out\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"Total Price Validation\", function() {\r",
+							"            pm.expect(jsonResponse.totalprice).to.eql(pm.iterationData.get(\"total_price\"))\r",
+							"        })\r",
+							"\r",
+							"        pm.test(\"Deposit Paid Validation\", function() {\r",
+							"            pm.expect(jsonResponse.depositpaid).to.eql(pm.iterationData.get(\"deposit_paid\"))\r",
+							"        })\r",
+							"        break;\r",
+							"    }\r",
+							"    case 404:\r",
+							"        pm.test(\"Not Found\")\r",
+							"        break;\r",
+							"    default:\r",
+							"        pm.test(\"Something went wrong!!! \")   \r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonToken = pm.response.json()\r",
+							"\r",
+							"pm.environment.set(\"access\", jsonToken.token)"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"username\": \"admin\",\r\n\t\"password\": \"password123\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/auth",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{access}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\": \"{{first_name}}\",\r\n    \"lastname\": \"{{last_name}}\",\r\n    \"totalprice\": {{total_price}},\r\n    \"depositpaid\": {{deposit_paid}},\r\n    \"bookingdates\": {\r\n        \"checkin\": \"{{check_in}}\",\r\n        \"checkout\": \"{{check_out}}\"\r\n    },\r\n    \"additionalneeds\": \"{{additional_needs}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch after Update",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonResponse = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Fisrt Name validation\", function() {\r",
+							"    pm.expect(jsonResponse.firstname).to.eql(pm.iterationData.get(\"first_name\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Last Name validation\", function() {\r",
+							"    pm.expect(jsonResponse.lastname).to.eql(pm.iterationData.get(\"last_name\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Check In validation\", function() {\r",
+							"    pm.expect(jsonResponse.bookingdates.checkin).to.eql(pm.iterationData.get(\"check_in\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Check Out validation\", function() {\r",
+							"    pm.expect(jsonResponse.bookingdates.checkout).to.eql(pm.iterationData.get(\"check_out\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Total Price Validation\", function() {\r",
+							"    pm.expect(jsonResponse.totalprice).to.eql(pm.iterationData.get(\"total_price\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Deposit Status Validation\", function() {\r",
+							"    pm.expect(jsonResponse.depositpaid).to.eql(pm.iterationData.get(\"deposit_paid\"))\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{access}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch after Delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/booking/{{id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
